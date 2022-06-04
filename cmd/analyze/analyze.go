@@ -36,14 +36,15 @@ var StunStatusCmd = &cobra.Command{
 		log = zap.New(func(o *zap.Options) {
 			o.Development = enableDebug
 		})
-		log.Info("checking stun status:")
+		log.V(1).Info("checking stun status:")
 		stuns, err := load(filename, log)
 		if err != nil {
 			log.Error(err, "failed to load stun list from file", "file", filename)
+			return
 		}
 		result := analyzeStunStatus(stuns, availableOnly, log)
 
-		for index, _ := range result {
+		for index := range result {
 			realAddress := result[index].RealAddress
 			if result[index].RealAddress == "" {
 				realAddress = "Not Available"
@@ -65,7 +66,7 @@ func analyzeStunStatus(addresses []string, availableOnly bool, log logr.Logger) 
 	defer close(statusChan)
 	result := []StunStatus{}
 	var wg sync.WaitGroup
-	for index, _ := range addresses {
+	for index := range addresses {
 		wg.Add(1)
 		go func(addr string, c chan StunStatus, log logr.Logger) {
 			defer wg.Done()
